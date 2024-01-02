@@ -186,40 +186,149 @@ int getListLength(struct Node* node)
   return size;
 }
 
-
-struct Node* subtractTwoLinkedLists(struct Node* first, struct Node* second)
+struct Node* padZeros (struct Node* smallerNode, int difference)
 {
-  struct Node* resultNode = NULL;
-  struct Node* tempNode;
-  struct Node* previousNode = NULL;
-  int carryOver = 0;
-  int sum;
+  // Base case
+  if (smallerNode == NULL)
+    return NULL;
 
-  while (first != NULL || second != NULL)
+  for (int i = 0; i < difference; ++i) 
   {
-    sum = carryOver + (first ? first->value : 0)
-      + (second ? second->value : 0);
+    struct Node* newNode = makeNode(0);
+    newNode->next = smallerNode;
+    smallerNode = newNode;
+  }
+  return smallerNode;
+}
 
-    carryOver = (sum >= 10) ? 1 : 0;
-    sum = sum % 10;
-    tempNode = makeNode(sum);
+static int borrow;
+struct Node* subtractLinkedListHelper(struct Node* l1, struct Node* l2)
+{
+if (l1 == NULL && l2 == NULL && borrow == 0)
+        return NULL;
+ 
+    struct Node* previous = subtractLinkedListHelper(
+        l1 ? l1->next : NULL, l2 ? l2->next : NULL);
+ 
+    int d1 = l1->value;
+    int d2 = l2->value;
+    int sub = 0;
+ 
+    /* if you have given the value to next digit then
+       reduce the d1 by 1 */
+    if (borrow) {
+        d1--;
+        borrow = 0;
+    }
+ 
+    /* If d1 < d2, then borrow the number from previous
+       digit. Add 10 to d1 and set borrow = true; */
+    if (d1 < d2) {
+        borrow = 1;
+        d1 = d1 + 10;
+    }
+ 
+    /* subtract the digits */
+    sub = d1 - d2;
+ 
+    /* Create a Node with sub value */
+    struct Node* current = makeNode(sub);
+ 
+    /* Set the Next pointer as Previous */
+    current->next = previous;
+ 
+    return current;
+}
 
-    if (resultNode == NULL)
-      resultNode = tempNode;
-    else
-      previousNode->next = tempNode;
+struct Node* subtractLinkedLists(struct Node* firstNode, struct Node* secondNode)
+{
+  if (firstNode == NULL && secondNode == NULL)
+    return NULL;
 
-    previousNode = tempNode;
+  int lengthOfFirstNode = getListLength(firstNode);
+  int lengthOfSecondNode = getListLength(secondNode);
+  struct Node* smallerListNode = NULL;
+  struct Node* largerListNode = NULL;
+  struct Node* tempNode1 = firstNode;
+  struct Node* tempNode2 = secondNode;
 
+  if (lengthOfFirstNode != lengthOfSecondNode)
+  {
+    largerListNode = (lengthOfFirstNode > lengthOfSecondNode) ? firstNode : secondNode;
+    smallerListNode = (lengthOfFirstNode > lengthOfSecondNode) ? secondNode : firstNode;
+    smallerListNode = padZeros(smallerListNode, abs(lengthOfFirstNode - lengthOfSecondNode));
+  }
+  else 
+  {
+    while (firstNode && secondNode)
+    {
+      if (firstNode->value != secondNode->value)
+      {
+        largerListNode = (firstNode->value > secondNode->value) ? tempNode1 : tempNode2;
+        smallerListNode = (firstNode->value > secondNode->value) ? tempNode2 : tempNode1;
+        break;
+      }
+      firstNode = firstNode->next;
+      secondNode = secondNode->next;
+    }
+  }
+  borrow = 0;
+  return subtractLinkedListHelper(largerListNode, smallerListNode);
+}
+
+int multiplyTwoLists(struct Node *first, struct Node *second)
+{
+  // Assumes only one digit is in each node
+  const int Mod = 1000000007;
+  int number1 = 0;
+  int number2 = 0;
+  while (first || second)
+  {
     if (first)
+    {
+      number1 = ((number1) * 10) % Mod + first->value;
       first = first->next;
+    }
+
     if (second)
+    {
+      number2 = ((number2) * 10) % Mod + second->value;
       second = second->next;
+    }
+  }
+  return ((number1 % Mod) * (number2 % Mod)) % Mod;
+}
+
+struct Node *divideList(struct Node *numerator, int denominator, int *remainder)
+{
+  if (denominator == 0)
+  {
+    printf("Error: Division by zero\n");
+    exit(EXIT_FAILURE);
   }
 
-  if (carryOver > 0)
-    tempNode->next = makeNode(carryOver);
+struct Node *quotient = NULL;
+  *remainder = 0;
 
-  return resultNode;
+  while (numerator != NULL)
+  {
+    int currentDigit = numerator->value + *remainder * 10;
+    int quotientDigit = currentDigit / denominator;
+    *remainder = currentDigit % denominator;
+
+    if (!(quotient == NULL && quotientDigit == 0))
+    {
+      pushToList(&quotient, quotientDigit);
+    }
+
+    numerator = numerator->next;
+  }
+
+  return quotient;
 }
+
+
+
+
+
 

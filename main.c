@@ -1,33 +1,33 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "linkedList.h"
 
 int main()
 {
   // 3 5 1
-  struct Node* node = makeNode(3);
-  pushToList(&node, 9);
+  struct Node* node = makeNode(2);
+  reverseLinkedList(&node);
   printf("List one : ");
   printList(node);
   printf("\n");
 
   // 5 2 8
-  struct Node* node2 = makeNode(5);
+  struct Node* node2 = makeNode(8);
+  reverseLinkedList(&node2);
   printf("List two : ");
-  pushToList(&node2, 2);
-  pushToList(&node2, 8);
   printList(node2);
   printf("\n");
-  
-  struct Node* resultNode = NULL;
-  resultNode = addTwoLinkedLists(node, node2);
-
-  reverseLinkedList(&resultNode);
-  printList(resultNode);
+  int denominator = 2;
+  int remainder;
+  struct Node* result = divideList(node2, denominator, &remainder);
+  reverseLinkedList(&node2);
+  printf("\ndivided value : ");
+  printList(result);
   printf("\n");
-
+  
   clearMemory(node);
   clearMemory(node2);
-  clearMemory(resultNode);
+  clearMemory(result);
 
   return 0;
 }
